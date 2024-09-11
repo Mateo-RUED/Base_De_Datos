@@ -74,6 +74,7 @@ Table inscripcion_examen {
     id_mesa integer
     fecha_inscripcion date
     nota decimal(5,2)
+    asistencia varchar(8) [note: 'presente o ausente']
 }
 
 Table plan_materia_materia {

@@ -62,10 +62,10 @@ VALUES
 
 
 -- Insertar datos en la tabla inscripcion_examen
-INSERT INTO inscripcion_examen (id_inscripcion_examen, id_alumno, id_mesa, fecha_inscripcion, nota) 
+INSERT INTO inscripcion_examen (id_inscripcion_examen, id_alumno, id_mesa, fecha_inscripcion, nota, estado) 
 VALUES 
-(1, 1, 1, '2023-11-20', 8.5),
-(2, 2, 2, '2023-11-21', 9.0);
+(1, 1, 1, '2023-11-20', 8.5, 'presente'),
+(2, 2, 2, '2023-11-21', NULL, 'ausente');
 
 -- Insertar datos en la tabla plan_materia_materia
 INSERT INTO plan_materia_materia (id_plan_materia, id_materia) 
