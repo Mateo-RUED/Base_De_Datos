@@ -1,0 +1,132 @@
+-- Crear la tabla alumnos
+CREATE TABLE alumnos (
+    id_alumno INT PRIMARY KEY,
+    nombre VARCHAR(100),
+    apellido VARCHAR(100),
+    fecha_nacimiento DATE,
+    direccion VARCHAR(255)
+);
+
+-- Crear la tabla carreras
+CREATE TABLE carreras (
+    id_carrera INT PRIMARY KEY,
+    nombre VARCHAR(100),
+    titulo VARCHAR(100)
+);
+
+-- Crear la tabla materias
+CREATE TABLE materias (
+    id_materia INT PRIMARY KEY,
+    nombre VARCHAR(100)
+);
+
+-- Crear la tabla profesor
+CREATE TABLE profesor (
+    id_profesor INT PRIMARY KEY,
+    nombre VARCHAR(100),
+    apellido VARCHAR(100)
+);
+
+-- Crear la tabla comision
+CREATE TABLE comision (
+    id_comision INT PRIMARY KEY,
+    nombre VARCHAR(100)
+);
+
+-- Crear la tabla plan_materias
+CREATE TABLE plan_materias (
+    id_plan_materia INT PRIMARY KEY,
+    id_carrera INT,
+    anio INT,
+    cuatrimestre INT,
+    FOREIGN KEY (id_carrera) REFERENCES carreras(id_carrera)
+);
+
+-- Crear la tabla inscripcion_carrera
+CREATE TABLE inscripcion_carrera (
+    id_inscripcion_carrera INT PRIMARY KEY,
+    id_alumno INT,
+    id_carrera INT,
+    fecha_matriculacion DATE,
+    estado VARCHAR(10),
+    FOREIGN KEY (id_alumno) REFERENCES alumnos(id_alumno),
+    FOREIGN KEY (id_carrera) REFERENCES carreras(id_carrera),
+    CHECK (estado IN ('activo', 'inactivo'))
+);
+
+-- Crear la tabla inscripcion_materia
+CREATE TABLE inscripcion_materia (
+    id_inscripcion_materia INT PRIMARY KEY,
+    id_alumno INT,
+    id_materia INT,
+    id_comision INT,
+    fecha_inscripcion DATE,
+    estado VARCHAR(50),
+    FOREIGN KEY (id_alumno) REFERENCES alumnos(id_alumno),
+    FOREIGN KEY (id_materia) REFERENCES materias(id_materia),
+    FOREIGN KEY (id_comision) REFERENCES comision(id_comision)
+);
+
+-- Crear la tabla parciales (sin la columna 'nota')
+CREATE TABLE parciales (
+    id_parcial INT PRIMARY KEY,
+    nombre VARCHAR(100),  -- Agregar un nombre descriptivo para el parcial
+    fecha DATE
+);
+
+-- Crear la tabla mesa
+CREATE TABLE mesa (
+    id_mesa INT PRIMARY KEY,
+    id_materia INT,
+    turno INT,
+    fecha DATE,
+    FOREIGN KEY (id_materia) REFERENCES materias(id_materia)  
+);
+
+-- Crear la tabla inscripcion_examen
+CREATE TABLE inscripcion_examen (
+    id_inscripcion_examen INT PRIMARY KEY,
+    id_alumno INT,
+    id_mesa INT,
+    fecha_inscripcion DATE,
+    nota DECIMAL(5,2),
+    FOREIGN KEY (id_alumno) REFERENCES alumnos(id_alumno),
+    FOREIGN KEY (id_mesa) REFERENCES mesa(id_mesa)
+);
+
+-- Crear la tabla puente entre plan_materias y materias
+CREATE TABLE plan_materia_materia (
+    id_plan_materia INT,
+    id_materia INT,
+    PRIMARY KEY (id_plan_materia, id_materia),
+    FOREIGN KEY (id_plan_materia) REFERENCES plan_materias(id_plan_materia),
+    FOREIGN KEY (id_materia) REFERENCES materias(id_materia)
+);
+
+-- Crear la tabla puente entre materias y profesor
+CREATE TABLE materia_profesor (
+    id_materia INT,
+    id_profesor INT,
+    PRIMARY KEY (id_materia, id_profesor),
+    FOREIGN KEY (id_materia) REFERENCES materias(id_materia),
+    FOREIGN KEY (id_profesor) REFERENCES profesor(id_profesor)
+);
+
+-- Crear la tabla puente entre profesor y comision
+CREATE TABLE profesor_comision (
+    id_profesor INT,
+    id_comision INT,
+    PRIMARY KEY (id_profesor, id_comision),
+    FOREIGN KEY (id_profesor) REFERENCES profesor(id_profesor),
+    FOREIGN KEY (id_comision) REFERENCES comision(id_comision)
+);
+
+-- Crear la tabla puente entre parciales e inscripcion_materia con la columna 'nota'
+CREATE TABLE parcial_inscripcion (
+    id_parcial INT,
+    id_inscripcion_materia INT,
+    nota DECIMAL(5,2),  -- Aquí se almacena la nota
+    PRIMARY KEY (id_parcial, id_inscripcion_materia),
+    FOREIGN KEY (id_parcial) REFERENCES parciales(id_parcial),
+    FOREIGN KEY (id_inscripcion_materia) REFERENCES inscripcion_materia(id_inscripcion_materia)
+);

@@ -1,0 +1,49 @@
+-- Crear usuarios con contraseñas
+CREATE USER 'alumno'@'localhost' IDENTIFIED BY 'contraseña_alumno';
+CREATE USER 'administrador'@'localhost' IDENTIFIED BY 'contraseña_admin';
+CREATE USER 'profesor'@'localhost' IDENTIFIED BY 'contraseña_profesor';
+CREATE USER 'secretario'@'localhost' IDENTIFIED BY 'contraseña_secretario';
+
+GRANT SELECT ON acad.alumnos TO 'alumno'@'localhost';
+GRANT SELECT ON acad.carreras TO 'alumno'@'localhost';
+GRANT SELECT ON acad.inscripcion_examen TO 'alumno'@'localhost';
+GRANT SELECT ON acad.inscripcion_materia TO 'alumno'@'localhost';
+GRANT SELECT ON acad.materias TO 'alumno'@'localhost';
+GRANT SELECT ON acad.mesa TO 'alumno'@'localhost';
+GRANT SELECT ON acad.plan_materias TO 'alumno'@'localhost';
+
+GRANT ALL PRIVILEGES ON acad.* TO 'administrador'@'localhost';
+
+GRANT SELECT ON acad.alumnos TO 'profesor'@'localhost';
+GRANT SELECT ON acad.comision TO 'profesor'@'localhost';
+GRANT SELECT, UPDATE ON acad.inscripcion_examen TO 'profesor'@'localhost';
+GRANT SELECT ON acad.inscripcion_materia TO 'profesor'@'localhost';
+GRANT SELECT ON acad.materias TO 'profesor'@'localhost';
+GRANT SELECT, UPDATE ON acad.parciales TO 'profesor'@'localhost';
+GRANT INSERT, UPDATE ON acad.parcial_inscripcion TO 'profesor'@'localhost';
+
+GRANT INSERT, UPDATE ON acad.alumnos TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.parcial_inscripcion TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.comision TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.inscripcion_carrera TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.inscripcion_examen TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.inscripcion_materia TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.mesa TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.plan_materias TO 'secretario'@'localhost';
+GRANT INSERT, UPDATE ON acad.profesor TO 'secretario'@'localhost';
+
+FLUSH PRIVILEGES;
+
+SHOW GRANTS FOR 'alumno'@'localhost';
+SHOW GRANTS FOR 'administrador'@'localhost';
+SHOW GRANTS FOR 'profesor'@'localhost';
+SHOW GRANTS FOR 'secretario'@'localhost';
+
+-------------------------
+usuarios y password:
+
+'alumno'@'localhost' Pass: 'password_alumno';
+'administrador'@'localhost' Pass: 'password_admin';
+'profesor'@'localhost' Pass: 'password_profesor';
+'secretario'@'localhost' Pass: 'password_secretario';
+

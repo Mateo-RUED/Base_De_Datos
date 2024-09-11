@@ -1,0 +1,92 @@
+-- Insertar datos en la tabla alumnos
+INSERT INTO alumnos (id_alumno, nombre, apellido, fecha_nacimiento, direccion) 
+VALUES 
+(1, 'Juan', 'Pérez', '2000-05-10', 'Calle Falsa 123'),
+(2, 'Ana', 'Gómez', '2001-06-15', 'Avenida Siempreviva 456'),
+(3, 'Carlos', 'Rodríguez', '1999-12-20', 'Calle Corrientes 789');
+
+-- Insertar datos en la tabla carreras
+INSERT INTO carreras (id_carrera, nombre, titulo) 
+VALUES 
+(1, 'Ingeniería en Sistemas', 'Ingeniero en Sistemas'),
+(2, 'Licenciatura en Administración', 'Licenciado en Administración');
+
+-- Insertar datos en la tabla materias
+INSERT INTO materias (id_materia, nombre) 
+VALUES 
+(1, 'Matemáticas I'),
+(2, 'Programación I'),
+(3, 'Contabilidad Básica');
+
+-- Insertar datos en la tabla profesor
+INSERT INTO profesor (id_profesor, nombre, apellido) 
+VALUES 
+(1, 'Miguel', 'Suárez'),
+(2, 'Laura', 'Martínez');
+
+-- Insertar datos en la tabla comision
+INSERT INTO comision (id_comision, nombre) 
+VALUES 
+(1, 'Comisión A'),
+(2, 'Comisión B');
+
+-- Insertar datos en la tabla plan_materias
+INSERT INTO plan_materias (id_plan_materia, id_carrera, anio, cuatrimestre) 
+VALUES 
+(1, 1, 1, 1), 
+(2, 2, 1, 1);
+
+-- Insertar datos en la tabla inscripcion_carrera
+INSERT INTO inscripcion_carrera (id_inscripcion_carrera, id_alumno, id_carrera, fecha_matriculacion, estado) 
+VALUES 
+(1, 1, 1, '2023-02-10', 'activo'),
+(2, 2, 2, '2023-03-15', 'activo');
+
+-- Insertar datos en la tabla inscripcion_materia
+INSERT INTO inscripcion_materia (id_inscripcion_materia, id_alumno, id_materia, id_comision, fecha_inscripcion, estado) 
+VALUES 
+(1, 1, 1, 1, '2023-04-01', 'regular'),
+(2, 2, 2, 2, '2023-04-01', 'regular');
+
+-- Insertar datos en la tabla parciales
+INSERT INTO parciales (id_parcial, nombre, fecha) 
+VALUES 
+(1, 'Parcial Matemáticas I', '2023-06-20'),
+(2, 'Parcial Programación I', '2023-06-25');
+
+-- Insertar datos en la tabla mesa sin el campo id_carrera
+INSERT INTO mesa (id_mesa, id_materia, turno, fecha) 
+VALUES 
+(1, 1, 1, '2023-12-01'),
+(2, 2, 2, '2023-12-05');
+
+
+-- Insertar datos en la tabla inscripcion_examen
+INSERT INTO inscripcion_examen (id_inscripcion_examen, id_alumno, id_mesa, fecha_inscripcion, nota) 
+VALUES 
+(1, 1, 1, '2023-11-20', 8.5),
+(2, 2, 2, '2023-11-21', 9.0);
+
+-- Insertar datos en la tabla plan_materia_materia
+INSERT INTO plan_materia_materia (id_plan_materia, id_materia) 
+VALUES 
+(1, 1),
+(2, 2);
+
+-- Insertar datos en la tabla materia_profesor
+INSERT INTO materia_profesor (id_materia, id_profesor) 
+VALUES 
+(1, 1),
+(2, 2);
+
+-- Insertar datos en la tabla profesor_comision
+INSERT INTO profesor_comision (id_profesor, id_comision) 
+VALUES 
+(1, 1),
+(2, 2);
+
+-- Insertar datos en la tabla parcial_inscripcion
+INSERT INTO parcial_inscripcion (id_parcial, id_inscripcion_materia, nota) 
+VALUES 
+(1, 1, 7.5),
+(2, 2, 8.0);

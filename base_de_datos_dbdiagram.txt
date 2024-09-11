@@ -1,0 +1,130 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table alumnos {
+    id_alumno integer [primary key]
+    nombre varchar(100)
+    apellido varchar(100)
+    fecha_nacimiento date
+    direccion varchar(255)
+}
+
+Table carreras {
+    id_carrera integer [primary key]
+    nombre varchar(100)
+    titulo varchar(100)
+}
+
+Table materias {
+    id_materia integer [primary key]
+    nombre varchar(100)
+}
+
+Table profesor {
+    id_profesor integer [primary key]
+    nombre varchar(100)
+    apellido varchar(100)
+}
+
+Table comision {
+    id_comision integer [primary key]
+    nombre varchar(100)
+}
+
+Table plan_materias {
+    id_plan_materia integer [primary key]
+    id_carrera integer
+    anio integer
+    cuatrimestre integer
+}
+
+Table inscripcion_carrera {
+    id_inscripcion_carrera integer [primary key]
+    id_alumno integer
+    id_carrera integer
+    fecha_matriculacion date
+    estado varchar(10) [note: 'activo o inactivo']
+}
+
+Table inscripcion_materia {
+    id_inscripcion_materia integer [primary key]
+    id_alumno integer
+    id_materia integer
+    id_comision integer
+    fecha_inscripcion date
+    estado varchar(50)
+}
+
+Table parciales {
+    id_parcial integer [primary key]
+    nombre varchar(100)
+    fecha date
+}
+
+Table mesa {
+    id_mesa integer [primary key]
+    id_materia integer
+    turno integer
+    fecha date
+}
+
+Table inscripcion_examen {
+    id_inscripcion_examen integer [primary key]
+    id_alumno integer
+    id_mesa integer
+    fecha_inscripcion date
+    nota decimal(5,2)
+}
+
+Table plan_materia_materia {
+    id_plan_materia integer
+    id_materia integer
+    primary key (id_plan_materia, id_materia)
+}
+
+Table materia_profesor {
+    id_materia integer
+    id_profesor integer
+    primary key (id_materia, id_profesor)
+}
+
+Table profesor_comision {
+    id_profesor integer
+    id_comision integer
+    primary key (id_profesor, id_comision)
+}
+
+Table parcial_inscripcion {
+    id_parcial integer
+    id_inscripcion_materia integer
+    nota decimal(5,2)
+    primary key (id_parcial, id_inscripcion_materia)
+}
+
+// Definición de relaciones
+
+Ref: inscripcion_carrera.id_alumno > alumnos.id_alumno
+Ref: inscripcion_carrera.id_carrera > carreras.id_carrera
+
+Ref: inscripcion_materia.id_alumno > alumnos.id_alumno
+Ref: inscripcion_materia.id_materia > materias.id_materia
+Ref: inscripcion_materia.id_comision > comision.id_comision
+
+Ref: plan_materias.id_carrera > carreras.id_carrera
+
+Ref: inscripcion_examen.id_alumno > alumnos.id_alumno
+Ref: inscripcion_examen.id_mesa > mesa.id_mesa
+
+Ref: mesa.id_materia > materias.id_materia
+
+Ref: plan_materia_materia.id_plan_materia > plan_materias.id_plan_materia
+Ref: plan_materia_materia.id_materia > materias.id_materia
+
+Ref: materia_profesor.id_materia > materias.id_materia
+Ref: materia_profesor.id_profesor > profesor.id_profesor
+
+Ref: profesor_comision.id_profesor > profesor.id_profesor
+Ref: profesor_comision.id_comision > comision.id_comision
+
+Ref: parcial_inscripcion.id_parcial > parciales.id_parcial
+Ref: parcial_inscripcion.id_inscripcion_materia > inscripcion_materia.id_inscripcion_materia
