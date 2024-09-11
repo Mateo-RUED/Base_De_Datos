@@ -1,0 +1,45 @@
+Cantidad de alumnos inscriptos por carrera
+● Cantidad de alumnos inscriptos por plan de carrera
+
+SELECT c.nombre AS carrera, COUNT(ic.id_alumno) AS cantidad_alumnos
+FROM carreras c
+JOIN inscripcion_carrera ic ON c.id_carrera = ic.id_carrera
+GROUP BY c.nombre;
+
+
+● Cantidad de alumnos “Activos” por plan de carrera
+
+SELECT pm.id_plan_materia, COUNT(ic.id_alumno) AS cantidad_alumnos
+FROM plan_materias pm
+JOIN inscripcion_carrera ic ON pm.id_carrera = ic.id_carrera
+GROUP BY pm.id_plan_materia;
+
+● Listado de alumnos inscriptos para cursar por materia
+
+SELECT m.nombre AS materia, a.nombre AS alumno, a.apellido
+FROM materias m
+JOIN inscripcion_materia im ON m.id_materia = im.id_materia
+JOIN alumnos a ON im.id_alumno = a.id_alumno;
+
+
+● Cantidad de alumnos Regulares y Libres por materia
+
+SELECT m.nombre AS materia,
+       SUM(CASE WHEN im.estado = 'regular' THEN 1 ELSE 0 END) AS regulares,
+       SUM(CASE WHEN im.estado = 'libre' THEN 1 ELSE 0 END) AS libres
+FROM materias m
+JOIN inscripcion_materia im ON m.id_materia = im.id_materia
+GROUP BY m.nombre;
+
+
+● Cantidad de exámenes rendidos y aprobados por materia (suponer Nota > 4)
+
+SELECT m.nombre AS materia,
+       COUNT(ie.id_inscripcion_examen) AS examenes_rendidos,
+       SUM(CASE WHEN ie.nota > 4 THEN 1 ELSE 0 END) AS examenes_aprobados
+FROM materias m
+LEFT JOIN mesa me ON m.id_materia = me.id_materia
+LEFT JOIN inscripcion_examen ie ON me.id_mesa = ie.id_mesa AND ie.estado = 'presente'
+GROUP BY m.nombre;
+
+

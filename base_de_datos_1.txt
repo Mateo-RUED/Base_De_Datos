@@ -90,6 +90,7 @@ CREATE TABLE inscripcion_examen (
     id_mesa INT,
     fecha_inscripcion DATE,
     nota DECIMAL(5,2),
+    estado ENUM('presente', 'ausente') DEFAULT 'presente',
     FOREIGN KEY (id_alumno) REFERENCES alumnos(id_alumno),
     FOREIGN KEY (id_mesa) REFERENCES mesa(id_mesa)
 );
