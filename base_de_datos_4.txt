@@ -28,7 +28,7 @@ SELECT m.nombre AS materia,
        SUM(CASE WHEN im.estado = 'regular' THEN 1 ELSE 0 END) AS regulares,
        SUM(CASE WHEN im.estado = 'libre' THEN 1 ELSE 0 END) AS libres
 FROM materias m
-JOIN inscripcion_materia im ON m.id_materia = im.id_materia
+LEFT JOIN inscripcion_materia im ON m.id_materia = im.id_materia
 GROUP BY m.nombre;
 
 
