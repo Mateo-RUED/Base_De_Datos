@@ -31,7 +31,7 @@ GRANT INSERT, UPDATE ON acad.inscripcion_materia TO 'secretario'@'localhost';
 GRANT INSERT, UPDATE ON acad.mesa TO 'secretario'@'localhost';
 GRANT INSERT, UPDATE ON acad.plan_materias TO 'secretario'@'localhost';
 GRANT INSERT, UPDATE ON acad.profesor TO 'secretario'@'localhost';
-
+GRANT INSERT, UPDATE ON acad.inscripcion_plan TO 'secretario'@'localhost';
 FLUSH PRIVILEGES;
 
 SHOW GRANTS FOR 'alumno'@'localhost';

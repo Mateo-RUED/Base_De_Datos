@@ -1,0 +1,72 @@
+DELIMITER $$
+
+CREATE FUNCTION verificar_existencia_plan(carrera_id INT, ano INT, cuatri INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO existe
+    FROM plan_materias
+    WHERE id_carrera = carrera_id
+    AND anio = ano
+    AND cuatrimestre = cuatri;
+
+    RETURN existe;
+END$$
+
+DELIMITER ;
+
+--------------------
+
+DELIMITER $$
+
+CREATE FUNCTION obtener_id_carrera(nombre_carrera VARCHAR(100))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE carrera_id INT ;
+
+    SELECT id_carrera INTO carrera_id
+    FROM carreras
+    WHERE nombre = nombre_carrera;
+
+    RETURN carrera_id;
+END$$
+
+DELIMITER ;
+
+
+-------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE cargar_plan_materias(
+    IN nombre_carrera VARCHAR(100), 
+    IN anio INT, 
+    IN cuatrimestre INT
+)
+BEGIN
+    DECLARE id_carrera INT;
+    
+    SET id_carrera = obtener_id_carrera(nombre_carrera);
+    
+    IF id_carrera IS NULL THEN
+        SELECT 'La carrera no existe.';
+    ELSE
+        IF verificar_existencia_plan(id_carrera, anio, cuatrimestre) THEN
+            SELECT 'El plan de materias ya existe.';
+        ELSE
+            INSERT INTO plan_materias (id_carrera, anio, cuatrimestre)
+            VALUES (id_carrera, anio, cuatrimestre);
+            
+            SELECT 'Plan de materias insertado exitosamente.';
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-----------------------------
+
+CALL cargar_plan_materias('Ingenieria en Sistemas', 2024, 2);

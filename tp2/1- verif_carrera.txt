@@ -1,0 +1,39 @@
+DELIMITER $$
+
+CREATE FUNCTION verificar_existencia_carrera(nombre_carrera VARCHAR(100))
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO existe
+    FROM carreras
+    WHERE nombre = nombre_carrera;
+
+    RETURN existe;
+END$$
+
+DELIMITER ;
+
+---------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE cargar_carrera(IN nombre_carrera VARCHAR(100), IN titulo_carrera VARCHAR(100))
+BEGIN
+   
+    IF verificar_existencia_carrera(nombre_carrera) THEN
+        SELECT 'La carrera ya existe.';
+    ELSE
+        INSERT INTO carreras (nombre, titulo)
+        VALUES (nombre_carrera, titulo_carrera);
+        
+        SELECT 'Carrera insertada exitosamente.';
+    END IF;
+END$$
+
+DELIMITER ;
+---------------------
+
+CALL cargar_carrera('Ingenieria Mecánica', 'Ingeniero Mecanico');
+

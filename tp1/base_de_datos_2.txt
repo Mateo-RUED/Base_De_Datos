@@ -36,8 +36,7 @@ VALUES
 (1, 1, 1, 1), 
 (2, 2, 1, 1);
 
--- Insertar datos en la tabla inscripcion_carrera
-INSERT INTO inscripcion_carrera (id_inscripcion_carrera, id_alumno, id_carrera, fecha_matriculacion, estado) 
+INSERT INTO inscripcion_plan (id_inscripcion_plan, id_alumno, id_plan_materia, fecha_matriculacion, estado) 
 VALUES 
 (1, 1, 1, '2023-02-10', 'activo'),
 (2, 2, 2, '2023-03-15', 'activo');

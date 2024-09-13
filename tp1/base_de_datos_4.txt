@@ -1,17 +1,18 @@
 Cantidad de alumnos inscriptos por carrera
 ● Cantidad de alumnos inscriptos por plan de carrera
 
-SELECT c.nombre AS carrera, COUNT(ic.id_alumno) AS cantidad_alumnos
+SELECT c.nombre AS carrera, pm.anio AS plan_anio, COUNT(ip.id_alumno) AS cantidad_alumnos
 FROM carreras c
-JOIN inscripcion_carrera ic ON c.id_carrera = ic.id_carrera
-GROUP BY c.nombre;
-
+JOIN plan_materias pm ON c.id_carrera = pm.id_carrera
+JOIN inscripcion_plan ip ON pm.id_plan_materia = ip.id_plan_materia
+GROUP BY c.nombre, pm.anio;
 
 ● Cantidad de alumnos “Activos” por plan de carrera
 
-SELECT pm.id_plan_materia, COUNT(ic.id_alumno) AS cantidad_alumnos
+SELECT pm.id_plan_materia, COUNT(ip.id_alumno) AS cantidad_alumnos
 FROM plan_materias pm
-JOIN inscripcion_carrera ic ON pm.id_carrera = ic.id_carrera
+JOIN inscripcion_plan ip ON pm.id_plan_materia = ip.id_plan_materia
+WHERE ip.estado = 'activo'
 GROUP BY pm.id_plan_materia;
 
 ● Listado de alumnos inscriptos para cursar por materia

@@ -1,6 +1,6 @@
 -- Crear la tabla alumnos
 CREATE TABLE alumnos (
-    id_alumno INT PRIMARY KEY,
+    id_alumno INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     apellido VARCHAR(100),
     fecha_nacimiento DATE,
@@ -9,54 +9,54 @@ CREATE TABLE alumnos (
 
 -- Crear la tabla carreras
 CREATE TABLE carreras (
-    id_carrera INT PRIMARY KEY,
+    id_carrera INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     titulo VARCHAR(100)
 );
 
 -- Crear la tabla materias
 CREATE TABLE materias (
-    id_materia INT PRIMARY KEY,
+    id_materia INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100)
 );
 
 -- Crear la tabla profesor
 CREATE TABLE profesor (
-    id_profesor INT PRIMARY KEY,
+    id_profesor INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     apellido VARCHAR(100)
 );
 
 -- Crear la tabla comision
 CREATE TABLE comision (
-    id_comision INT PRIMARY KEY,
+    id_comision INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100)
 );
 
 -- Crear la tabla plan_materias
 CREATE TABLE plan_materias (
-    id_plan_materia INT PRIMARY KEY,
+    id_plan_materia INT AUTO_INCREMENT PRIMARY KEY,
     id_carrera INT,
     anio INT,
     cuatrimestre INT,
     FOREIGN KEY (id_carrera) REFERENCES carreras(id_carrera)
 );
 
--- Crear la tabla inscripcion_carrera
-CREATE TABLE inscripcion_carrera (
-    id_inscripcion_carrera INT PRIMARY KEY,
+-- Crear la tabla inscripcion_plan corregida
+CREATE TABLE inscripcion_plan(
+    id_inscripcion_plan INT AUTO_INCREMENT PRIMARY KEY,
     id_alumno INT,
-    id_carrera INT,
+    id_plan_materia INT,
     fecha_matriculacion DATE,
-    estado VARCHAR(10),
+    estado VARCHAR(10) DEFAULT 'activo',
     FOREIGN KEY (id_alumno) REFERENCES alumnos(id_alumno),
-    FOREIGN KEY (id_carrera) REFERENCES carreras(id_carrera),
+    FOREIGN KEY (id_plan_materia) REFERENCES plan_materias(id_plan_materia),
     CHECK (estado IN ('activo', 'inactivo'))
 );
 
 -- Crear la tabla inscripcion_materia
 CREATE TABLE inscripcion_materia (
-    id_inscripcion_materia INT PRIMARY KEY,
+    id_inscripcion_materia INT AUTO_INCREMENT PRIMARY KEY,
     id_alumno INT,
     id_materia INT,
     id_comision INT,
@@ -69,23 +69,23 @@ CREATE TABLE inscripcion_materia (
 
 -- Crear la tabla parciales (sin la columna 'nota')
 CREATE TABLE parciales (
-    id_parcial INT PRIMARY KEY,
+    id_parcial INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),  -- Agregar un nombre descriptivo para el parcial
     fecha DATE
 );
 
 -- Crear la tabla mesa
 CREATE TABLE mesa (
-    id_mesa INT PRIMARY KEY,
+    id_mesa INT AUTO_INCREMENT PRIMARY KEY,
     id_materia INT,
     turno INT,
     fecha DATE,
-    FOREIGN KEY (id_materia) REFERENCES materias(id_materia)  
+    FOREIGN KEY (id_materia) REFERENCES materias(id_materia)
 );
 
 -- Crear la tabla inscripcion_examen
 CREATE TABLE inscripcion_examen (
-    id_inscripcion_examen INT PRIMARY KEY,
+    id_inscripcion_examen INT AUTO_INCREMENT PRIMARY KEY,
     id_alumno INT,
     id_mesa INT,
     fecha_inscripcion DATE,

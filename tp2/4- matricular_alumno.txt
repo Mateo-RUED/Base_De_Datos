@@ -1,0 +1,102 @@
+DELIMITER $$
+
+CREATE FUNCTION obtener_id_alumno(nome VARCHAR(100), apelido VARCHAR(100))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE alumno_id INT;
+
+    SELECT id_alumno INTO alumno_id
+    FROM alumnos
+    WHERE nombre = nome
+    AND apellido = apelido;
+
+    RETURN alumno_id;
+END$$
+
+DELIMITER ;
+
+------------------
+
+DELIMITER $$
+CREATE FUNCTION verificar_existencia_alumno(nome VARCHAR(100), apelido VARCHAR(100))
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+    
+    SELECT COUNT(*) > 0 INTO existe
+    FROM alumnos
+    WHERE nombre = nome
+    and apellido = apelido;
+
+    RETURN existe;
+END$$
+DELIMITER ;
+
+-----------------------
+
+DELIMITER $$
+CREATE FUNCTION verificar_matricula_existente(alumno_id INT, plan_id INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+    
+    SELECT COUNT(*) > 0 INTO existe
+    FROM inscripcion_plan
+    WHERE id_alumno = alumno_id
+    AND id_plan_materia = plan_id;
+
+    RETURN existe;
+END$$
+DELIMITER ;
+------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE matricular_alumno(
+    IN nombre VARCHAR(100),
+    IN apellido VARCHAR(100),
+    IN anio INT,
+    IN cuatrimestre INT,
+    IN fecha_matriculacion DATE
+)
+BEGIN
+    DECLARE id_alumno INT;
+    DECLARE id_plan INT;
+
+    IF NOT verificar_existencia_alumno(nombre, apellido) THEN
+        SELECT 'El alumno no existe.' AS mensaje;
+    ELSE
+        IF NOT verificar_plan(anio, cuatrimestre) THEN
+            SELECT 'El plan de carrera no existe.' AS mensaje;
+        ELSE
+            SET id_alumno = obtener_id_alumno(nombre, apellido);
+            SET id_plan = obtener_id_plan(anio, cuatrimestre);
+
+            IF verificar_matricula_existente(id_alumno, id_plan) THEN
+                SELECT 'El alumno ya está matriculado en este plan de carrera.' AS mensaje;
+            ELSE
+                INSERT INTO inscripcion_plan (id_alumno, id_plan_materia, fecha_matriculacion)
+                VALUES (id_alumno, id_plan, fecha_matriculacion);
+
+                SELECT 'Matrícula realizada exitosamente.' AS mensaje;
+            END IF;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+-------------------
+
+CALL matricular_alumno('Juan', 'Pérez', 2028, 1, '2024-09-15');
+
+SELECT obtener_id_plan(2024, 1);
+
+
+
+
+

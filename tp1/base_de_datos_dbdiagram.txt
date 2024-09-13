@@ -2,7 +2,7 @@
 // Docs: https://dbml.dbdiagram.io/docs
 
 Table alumnos {
-    id_alumno integer [primary key]
+    id_alumno integer [primary key, increment]
     nombre varchar(100)
     apellido varchar(100)
     fecha_nacimiento date
@@ -10,44 +10,44 @@ Table alumnos {
 }
 
 Table carreras {
-    id_carrera integer [primary key]
+    id_carrera integer [primary key, increment]
     nombre varchar(100)
     titulo varchar(100)
 }
 
 Table materias {
-    id_materia integer [primary key]
+    id_materia integer [primary key, increment]
     nombre varchar(100)
 }
 
 Table profesor {
-    id_profesor integer [primary key]
+    id_profesor integer [primary key, increment]
     nombre varchar(100)
     apellido varchar(100)
 }
 
 Table comision {
-    id_comision integer [primary key]
+    id_comision integer [primary key, increment]
     nombre varchar(100)
 }
 
 Table plan_materias {
-    id_plan_materia integer [primary key]
+    id_plan_materia integer [primary key, increment]
     id_carrera integer
     anio integer
     cuatrimestre integer
 }
 
-Table inscripcion_carrera {
-    id_inscripcion_carrera integer [primary key]
+Table inscripcion_plan {
+    id_inscripcion_plan integer [primary key, increment]
     id_alumno integer
-    id_carrera integer
+    id_plan_materia integer
     fecha_matriculacion date
     estado varchar(10) [note: 'activo o inactivo']
 }
 
 Table inscripcion_materia {
-    id_inscripcion_materia integer [primary key]
+    id_inscripcion_materia integer [primary key, increment]
     id_alumno integer
     id_materia integer
     id_comision integer
@@ -56,20 +56,20 @@ Table inscripcion_materia {
 }
 
 Table parciales {
-    id_parcial integer [primary key]
+    id_parcial integer [primary key, increment]
     nombre varchar(100)
     fecha date
 }
 
 Table mesa {
-    id_mesa integer [primary key]
+    id_mesa integer [primary key, increment]
     id_materia integer
     turno integer
     fecha date
 }
 
 Table inscripcion_examen {
-    id_inscripcion_examen integer [primary key]
+    id_inscripcion_examen integer [primary key, increment]
     id_alumno integer
     id_mesa integer
     fecha_inscripcion date
@@ -104,8 +104,8 @@ Table parcial_inscripcion {
 
 // Definición de relaciones
 
-Ref: inscripcion_carrera.id_alumno > alumnos.id_alumno
-Ref: inscripcion_carrera.id_carrera > carreras.id_carrera
+Ref: inscripcion_plan.id_alumno > alumnos.id_alumno
+Ref: inscripcion_plan.id_plan_materia > plan_materias.id_plan_materia
 
 Ref: inscripcion_materia.id_alumno > alumnos.id_alumno
 Ref: inscripcion_materia.id_materia > materias.id_materia

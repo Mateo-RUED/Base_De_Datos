@@ -1,0 +1,141 @@
+DELIMITER $$
+
+CREATE FUNCTION verificar_plan(ano INT, cuatri INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO existe
+    FROM plan_materias
+    WHERE anio = ano
+    AND cuatrimestre = cuatri;
+
+    RETURN existe;
+END$$
+
+DELIMITER ;
+
+------------------
+
+DELIMITER $$
+
+CREATE FUNCTION verificar_materia(materia VARCHAR(100))
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO existe
+    FROM materias
+    WHERE nombre = materia;
+
+    RETURN existe;
+END$$
+
+DELIMITER ;
+
+----------------
+
+DELIMITER $$
+
+CREATE FUNCTION obtener_id_plan(ano INT, cuatri INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE plan_id INT;
+
+    SELECT id_plan_materia INTO plan_id
+    FROM plan_materias
+    WHERE anio = ano
+    AND cuatrimestre = cuatri;
+
+    RETURN plan_id;
+END$$
+
+DELIMITER ;
+
+--------------
+
+DELIMITER $$
+
+CREATE FUNCTION obtener_id_materia(materia VARCHAR(100))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE materia_id INT;
+
+    SELECT id_materia INTO materia_id
+    FROM materias
+    WHERE nombre = materia;
+
+    RETURN materia_id;
+END$$
+
+DELIMITER ;
+
+-------------
+
+DELIMITER $$
+
+CREATE FUNCTION verificar_materia_plan(anio INT, cuatrimestre INT, materia VARCHAR(100))
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+    DECLARE plan_id INT;
+    DECLARE materia_id INT;
+
+    SET plan_id = obtener_id_plan(anio, cuatrimestre);
+    SET materia_id = obtener_id_materia(materia);
+
+    SELECT COUNT(*) > 0 INTO existe
+    FROM plan_materia_materia
+    WHERE id_plan_materia = plan_id
+    AND id_materia = materia_id;
+
+    RETURN existe;
+END$$
+
+DELIMITER ;
+
+-------------
+
+DELIMITER $$
+
+CREATE PROCEDURE cargar_materias_en_plan(
+    IN anio INT, 
+    IN cuatrimestre INT,
+    IN materia VARCHAR(100)
+)
+BEGIN
+    DECLARE id_plan INT;
+    DECLARE id_materia INT;
+
+    IF NOT verificar_plan(anio, cuatrimestre) THEN
+        SELECT 'El plan NO existe.' AS mensaje;
+    ELSE
+        IF NOT verificar_materia(materia) THEN
+            SELECT 'La materia NO existe.' AS mensaje;
+        ELSE
+            IF verificar_materia_plan(anio, cuatrimestre, materia) THEN
+                SELECT 'La materia ya fue insertada en su plan.' AS mensaje;
+            ELSE
+                SET id_plan = obtener_id_plan(anio, cuatrimestre);
+                SET id_materia = obtener_id_materia(materia);
+
+                INSERT INTO plan_materia_materia(id_plan_materia, id_materia)
+                VALUES (id_plan, id_materia);
+
+                SELECT 'Materia insertada exitosamente en el plan.' AS mensaje;
+            END IF;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
+
+--------------------
+
+CALL cargar_materias_en_plan(2024, 2, 'Programacion I');
+
