@@ -6,7 +6,7 @@ DETERMINISTIC
 BEGIN
     DECLARE estado_actual VARCHAR(20);
     SELECT estado INTO estado_actual
-    FROM inscripcion_materias
+    FROM inscripcion_materia
     WHERE id_alumno = alumno_id
     AND id_materia = materia_id
     LIMIT 1;
@@ -14,10 +14,7 @@ BEGIN
 END$$
 
 DELIMITER ;
-
----------------------------------------------------------------------------------------
-
-
+-----------------------------
 DELIMITER $$
 
 CREATE PROCEDURE inscribir_en_materia(
@@ -32,7 +29,6 @@ BEGIN
     DECLARE estado_inscripcion VARCHAR(20);
 
     SET id_alumno = obtener_id_alumno(nombre, apellido);
-  
     SET id_materia = obtener_id_materia(materia);
     
     SET estado_inscripcion = verificar_inscripcion_materia(id_alumno, id_materia);
@@ -42,7 +38,7 @@ BEGIN
     ELSEIF estado_inscripcion = 'Cursando' THEN
         SELECT 'No se puede inscribir. El alumno ya está cursando la materia.' AS mensaje;
     ELSEIF estado_inscripcion = 'Libre' OR estado_inscripcion = 'No Inscrito' THEN
-        INSERT INTO inscripcion_materias (id_alumno, id_materia, estado, fecha_inscripcion)
+        INSERT INTO inscripcion_materia (id_alumno, id_materia, estado, fecha_inscripcion)
         VALUES (id_alumno, id_materia, 'Cursando', fecha_inscripcion);
         
         SELECT 'Inscripción en la materia realizada exitosamente.' AS mensaje;
@@ -52,8 +48,5 @@ BEGIN
 END$$
 
 DELIMITER ;
----------------------------------------------------------------------------------------
-
-
+----------------------------
 CALL inscribir_en_materia('Juan', 'Pérez', 'Programacion I', '2024-09-16');
-
