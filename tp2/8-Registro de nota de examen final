@@ -1,0 +1,46 @@
+DELIMITER $$
+
+CREATE FUNCTION inscripcion_examen_exists(id_alumno INT, id_mesa INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe BOOLEAN;
+    SELECT COUNT(*) > 0 INTO existe
+    FROM inscripcion_examen
+    WHERE id_alumno = id_alumno AND id_mesa = id_mesa;
+    RETURN existe;
+END$$
+
+DELIMITER ;
+------------------------------------------------------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE registrar_nota_examen(
+    IN nombre_alumno VARCHAR(100),
+    IN apellido_alumno VARCHAR(100),
+    IN id_mesa INT,
+    IN nota DECIMAL(5,2)
+)
+BEGIN
+    DECLARE id_alumno INT;
+    DECLARE existe_inscripcion BOOLEAN;
+
+    SET id_alumno = (SELECT id_alumno FROM alumnos WHERE nombre = nombre_alumno AND apellido = apellido_alumno);
+    SET existe_inscripcion = inscripcion_examen_exists(id_alumno, id_mesa);
+
+    IF NOT existe_inscripcion THEN
+        SELECT 'No existe inscripción en el examen para el alumno.' AS mensaje;
+    ELSEIF nota < 0 OR nota > 10 THEN
+        SELECT 'La nota debe estar en el rango de 0 a 10.' AS mensaje;
+    ELSE
+        UPDATE inscripcion_examen
+        SET nota = nota
+        WHERE id_alumno = id_alumno AND id_mesa = id_mesa;
+        SELECT 'Nota registrada exitosamente.' AS mensaje;
+    END IF;
+END$$
+
+DELIMITER ;
+------------------------------------------------------------------------------------------
+-- Para probar el procedimiento
+CALL registrar_nota_examen('Juan', 'Pérez', 1, 8.5);
