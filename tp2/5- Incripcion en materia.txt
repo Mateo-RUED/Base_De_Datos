@@ -30,23 +30,29 @@ BEGIN
 
     SET id_alumno = obtener_id_alumno(nombre, apellido);
     SET id_materia = obtener_id_materia(materia);
-    
-    SET estado_inscripcion = verificar_inscripcion_materia(id_alumno, id_materia);
 
-    IF estado_inscripcion = 'Regular' THEN
-        SELECT 'No se puede inscribir. El alumno ya tiene estado Regular en la materia.' AS mensaje;
-    ELSEIF estado_inscripcion = 'Cursando' THEN
-        SELECT 'No se puede inscribir. El alumno ya está cursando la materia.' AS mensaje;
-    ELSEIF estado_inscripcion = 'Libre' OR estado_inscripcion = 'No Inscrito' THEN
-        INSERT INTO inscripcion_materia (id_alumno, id_materia, estado, fecha_inscripcion)
-        VALUES (id_alumno, id_materia, 'Cursando', fecha_inscripcion);
-        
-        SELECT 'Inscripción en la materia realizada exitosamente.' AS mensaje;
+    IF NOT verificar_materia(materia) THEN
+        SELECT 'La materia NO existe.' AS mensaje;
+    ELSEIF NOT verificar_existencia_alumno(nombre, apellido) THEN
+        SELECT 'El alumno no existe.' AS mensaje;
     ELSE
-        SELECT 'Error en el proceso de inscripción.' AS mensaje;
+        SET estado_inscripcion = verificar_inscripcion_materia(id_alumno, id_materia);
+
+        IF estado_inscripcion = 'Regular' THEN
+            SELECT 'No se puede inscribir. El alumno ya tiene estado Regular en la materia.' AS mensaje;
+        ELSEIF estado_inscripcion = 'Cursando' THEN
+            SELECT 'No se puede inscribir. El alumno ya está cursando la materia.' AS mensaje;
+        ELSEIF estado_inscripcion = 'Libre' OR estado_inscripcion = 'No Inscrito' THEN
+            INSERT INTO inscripcion_materia (id_alumno, id_materia, estado, fecha_inscripcion)
+            VALUES (id_alumno, id_materia, 'Cursando', fecha_inscripcion);
+            SELECT 'Inscripción en la materia realizada exitosamente.' AS mensaje;
+        ELSE
+            SELECT 'Error en el proceso de inscripción.' AS mensaje;
+        END IF;
     END IF;
 END$$
 
 DELIMITER ;
+
 ----------------------------
 CALL inscribir_en_materia('Juan', 'Pérez', 'Programacion I', '2024-09-16');
