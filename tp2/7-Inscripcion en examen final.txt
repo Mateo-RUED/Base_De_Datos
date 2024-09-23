@@ -59,4 +59,5 @@ END //
 DELIMITER ;
 ----------------------------------------------------------------------------------------------------------------
 -- Para probar el procedimiento
-CALL inscribir_en_examen('Juan', 'Pérez', 'Programacion I', 1, '2024-09-16');
+CALL inscribir_en_examen(1, 2, 3, '2024-10-01');
+
