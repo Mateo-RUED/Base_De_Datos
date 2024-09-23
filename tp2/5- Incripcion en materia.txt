@@ -72,4 +72,4 @@ END$$
 DELIMITER ;
 
 ----------------------------
-CALL inscribir_en_materia('Juan', 'Pérez', 'Programacion I', '2024-09-16');
+CALL inscribir_en_materia('Juan', 'Pérez', 'Programacion I',1, '2024-09-16');
