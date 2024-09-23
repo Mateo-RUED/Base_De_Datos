@@ -1,58 +1,75 @@
 DELIMITER $$
-
-CREATE FUNCTION verificar_inscripcion_materia(alumno_id INT, materia_id INT)
-RETURNS VARCHAR(20)
+CREATE FUNCTION verificar_existencia_comision(comision_id INT)
+RETURNS BOOLEAN
 DETERMINISTIC
 BEGIN
-    DECLARE estado_actual VARCHAR(20);
-    SELECT estado INTO estado_actual
-    FROM inscripcion_materia
-    WHERE id_alumno = alumno_id
-    AND id_materia = materia_id
-    LIMIT 1;
-    RETURN IFNULL(estado_actual, 'No Inscrito');
+    DECLARE existe INT;
+    SELECT COUNT(*) INTO existe
+    FROM comision
+    WHERE id_comision = comision_id;
+    RETURN existe > 0;
 END$$
+DELIMITER ;
 
-DELIMITER ;
------------------------------
 DELIMITER $$
 
+CREATE FUNCTION verificar_plan_alumno(id_alumno INT, materia_id INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existe INT;
+    SELECT COUNT(*) INTO existe
+    FROM inscripcion_plan ip
+    JOIN plan_materia_materia pmm ON ip.id_plan_materia = pmm.id_plan_materia
+    WHERE ip.id_alumno = id_alumno  
+    AND pmm.id_materia = materia_id;
+    RETURN existe > 0;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
 CREATE PROCEDURE inscribir_en_materia(
     IN nombre VARCHAR(100),
     IN apellido VARCHAR(100),
     IN materia VARCHAR(100),
+    IN id_comision INT,
     IN fecha_inscripcion DATE
 )
 BEGIN
     DECLARE id_alumno INT;
     DECLARE id_materia INT;
-    DECLARE estado_inscripcion VARCHAR(20);
-
+    DECLARE estado_inscripcion VARCHAR(50);
+    
     SET id_alumno = obtener_id_alumno(nombre, apellido);
     SET id_materia = obtener_id_materia(materia);
-
+    
     IF NOT verificar_materia(materia) THEN
         SELECT 'La materia NO existe.' AS mensaje;
     ELSEIF NOT verificar_existencia_alumno(nombre, apellido) THEN
         SELECT 'El alumno no existe.' AS mensaje;
+    ELSEIF NOT verificar_existencia_comision(id_comision) THEN
+        SELECT 'La comisión no es válida.' AS mensaje;
+    ELSEIF NOT verificar_plan_alumno(id_alumno,id_materia) THEN
+        SELECT 'La materia no pertenece al plan del alumno';
     ELSE
         SET estado_inscripcion = verificar_inscripcion_materia(id_alumno, id_materia);
-
+        
         IF estado_inscripcion = 'Regular' THEN
             SELECT 'No se puede inscribir. El alumno ya tiene estado Regular en la materia.' AS mensaje;
         ELSEIF estado_inscripcion = 'Cursando' THEN
             SELECT 'No se puede inscribir. El alumno ya está cursando la materia.' AS mensaje;
         ELSEIF estado_inscripcion = 'Libre' OR estado_inscripcion = 'No Inscrito' THEN
-            INSERT INTO inscripcion_materia (id_alumno, id_materia, estado, fecha_inscripcion)
-            VALUES (id_alumno, id_materia, 'Cursando', fecha_inscripcion);
+            INSERT INTO inscripcion_materia (id_alumno, id_materia, id_comision, estado, fecha_inscripcion)
+            VALUES (id_alumno, id_materia, id_comision, 'Cursando', fecha_inscripcion);
             SELECT 'Inscripción en la materia realizada exitosamente.' AS mensaje;
         ELSE
             SELECT 'Error en el proceso de inscripción.' AS mensaje;
         END IF;
     END IF;
 END$$
-
-DELIMITER ;
+DELIMITER ;
 
 ----------------------------
 CALL inscribir_en_materia('Juan', 'Pérez', 'Programacion I', '2024-09-16');
