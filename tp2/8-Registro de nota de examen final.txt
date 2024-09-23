@@ -1,44 +1,41 @@
-DELIMITER $$
+DELIMITER //
 
-CREATE FUNCTION inscripcion_examen_exists(id_alumno INT, id_mesa INT)
+CREATE FUNCTION existe_inscripcion_examen(p_id_alumno INT, p_id_mesa INT)
 RETURNS BOOLEAN
 DETERMINISTIC
 BEGIN
-    DECLARE existe BOOLEAN;
-    SELECT COUNT(*) > 0 INTO existe
-    FROM inscripcion_examen
-    WHERE id_alumno = id_alumno AND id_mesa = id_mesa;
-    RETURN existe;
-END$$
+    DECLARE v_count INT;
 
-DELIMITER ;
+    SELECT COUNT(*) INTO v_count
+    FROM inscripcion_examen
+    WHERE id_alumno = p_id_alumno AND id_mesa = p_id_mesa;
+
+    RETURN v_count > 0;
+END //
+
+DELIMITER ;
+
+
 ------------------------------------------------------------------------------------------
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE registrar_nota_examen(
-    IN nombre_alumno VARCHAR(100),
-    IN apellido_alumno VARCHAR(100),
-    IN id_mesa INT,
-    IN nota DECIMAL(5,2)
+    IN p_id_alumno INT,
+    IN p_id_mesa INT,
+    IN p_nota DECIMAL(5,2)
 )
 BEGIN
-    DECLARE id_alumno INT;
-    DECLARE existe_inscripcion BOOLEAN;
-
-    SET id_alumno = (SELECT id_alumno FROM alumnos WHERE nombre = nombre_alumno AND apellido = apellido_alumno);
-    SET existe_inscripcion = inscripcion_examen_exists(id_alumno, id_mesa);
-
-    IF NOT existe_inscripcion THEN
-        SELECT 'No existe inscripción en el examen para el alumno.' AS mensaje;
-    ELSEIF nota < 0 OR nota > 10 THEN
+    IF NOT existe_inscripcion_examen(p_id_alumno, p_id_mesa) THEN
+        SELECT 'No existe una inscripción en el examen para el alumno.' AS mensaje;
+    ELSEIF p_nota < 0 OR p_nota > 10 THEN
         SELECT 'La nota debe estar en el rango de 0 a 10.' AS mensaje;
     ELSE
         UPDATE inscripcion_examen
-        SET nota = nota
-        WHERE id_alumno = id_alumno AND id_mesa = id_mesa;
+        SET nota = p_nota, estado = 'presente'
+        WHERE id_alumno = p_id_alumno AND id_mesa = p_id_mesa;
         SELECT 'Nota registrada exitosamente.' AS mensaje;
     END IF;
-END$$
+END //
 
 DELIMITER ;
 ------------------------------------------------------------------------------------------
