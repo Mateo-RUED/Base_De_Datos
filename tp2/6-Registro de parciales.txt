@@ -1,73 +1,106 @@
-DELIMITER $$
+DELIMITER //
 
-CREATE FUNCTION contar_parciales(id_inscripcion_materia INT, estado_parcial VARCHAR(20))
+CREATE FUNCTION contar_parciales_aprobados(p_id_alumno INT, p_id_materia INT)
 RETURNS INT
 DETERMINISTIC
 BEGIN
-    DECLARE cantidad INT;
-    SELECT COUNT(*) INTO cantidad
+    DECLARE aprobados INT;
+    
+    SELECT COUNT(*) INTO aprobados
     FROM parcial_inscripcion pi
-    JOIN parciales p ON pi.id_parcial = p.id_parcial
-    WHERE pi.id_inscripcion_materia = id_inscripcion_materia
-    AND p.nombre = estado_parcial;
-    RETURN cantidad;
-END$$
+    INNER JOIN inscripcion_materia im ON pi.id_inscripcion_materia = im.id_inscripcion_materia
+    WHERE im.id_alumno = p_id_alumno
+    AND im.id_materia = p_id_materia
+    AND pi.nota >= 4.00;
+
+    RETURN aprobados;
+END //
+
+DELIMITER ;
+DELIMITER //
+
+CREATE FUNCTION contar_parciales_desaprobados(p_id_alumno INT, p_id_materia INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE desaprobados INT;
+    
+    SELECT COUNT(*) INTO desaprobados
+    FROM parcial_inscripcion pi
+    INNER JOIN inscripcion_materia im ON pi.id_inscripcion_materia = im.id_inscripcion_materia
+    WHERE im.id_alumno = p_id_alumno
+    AND im.id_materia = p_id_materia
+    AND pi.nota < 4.00;
+
+    RETURN desaprobados;
+END //
+
+DELIMITER ;
+
+-- Función para verificar si el estado de inscripción es "Cursando"
+DELIMITER //
+
+CREATE FUNCTION verificar_estado_inscripcion(p_id_alumno INT, p_id_materia INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE estado_actual VARCHAR(20);
+    
+    SELECT estado INTO estado_actual
+    FROM inscripcion_materia
+    WHERE id_alumno = p_id_alumno
+    AND id_materia = p_id_materia;
+    
+    IF estado_actual = 'cursando' THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+END //
 
 DELIMITER ;
-------------------------------------------------------------------------------------------------------------
-DELIMITER $$
 
-CREATE PROCEDURE registrar_parcial(
-    IN nombre_alumno VARCHAR(100),
-    IN apellido_alumno VARCHAR(100),
-    IN nombre_materia VARCHAR(100),
-    IN nombre_parcial VARCHAR(100),
-    IN fecha_parcial DATE,
-    IN nota DECIMAL(5,2)
+-- Procedimiento para agregar una nota de parcial
+DELIMITER //
+
+CREATE PROCEDURE agregar_nota_parcial(
+    IN p_id_alumno INT,
+    IN p_id_materia INT,
+    IN p_id_parcial INT,
+    IN p_nota DECIMAL(5,2)
 )
 BEGIN
-    DECLARE id_alumno INT;
-    DECLARE id_materia INT;
-    DECLARE id_inscripcion_materia INT;
-    DECLARE estado_inscripcion VARCHAR(20);
-    DECLARE parciales_aprobados INT;
-    DECLARE parciales_no_aprobados INT;
+    DECLARE aprobados INT;
+    DECLARE desaprobados INT;
+    DECLARE estado_valido BOOLEAN;
 
-    SET id_alumno = (SELECT id_alumno FROM alumnos WHERE nombre = nombre_alumno AND apellido = apellido_alumno);
-    SET id_materia = (SELECT id_materia FROM materias WHERE nombre = nombre_materia);
-    SET id_inscripcion_materia = (SELECT id_inscripcion_materia FROM inscripcion_materia WHERE id_alumno = id_alumno AND id_materia = id_materia);
-    SET estado_inscripcion = (SELECT estado FROM inscripcion_materia WHERE id_inscripcion_materia = id_inscripcion_materia);
-
-    IF estado_inscripcion = 'Cursando' THEN
+    SET estado_valido = verificar_estado_inscripcion(p_id_alumno, p_id_materia);
+    
+    IF estado_valido THEN
         INSERT INTO parcial_inscripcion (id_parcial, id_inscripcion_materia, nota)
-        VALUES (
-            (SELECT id_parcial FROM parciales WHERE nombre = nombre_parcial),
-            id_inscripcion_materia,
-            nota
-        );
-
-        SET parciales_aprobados = contar_parciales(id_inscripcion_materia, 'Aprobado');
-        SET parciales_no_aprobados = contar_parciales(id_inscripcion_materia, 'No Aprobado');
-
-        IF parciales_aprobados >= 2 THEN
+        SELECT p_id_parcial, ins.id_inscripcion_materia, p_nota
+        FROM inscripcion_materia ins
+        WHERE ins.id_alumno = p_id_alumno
+        AND ins.id_materia = p_id_materia;
+        
+        SET aprobados = contar_parciales_aprobados(p_id_alumno, p_id_materia);
+        SET desaprobados = contar_parciales_desaprobados(p_id_alumno, p_id_materia);
+        
+        IF aprobados >= 2 THEN
             UPDATE inscripcion_materia
-            SET estado = 'Regular'
-            WHERE id_inscripcion_materia = id_inscripcion_materia;
-            SELECT 'Estado de inscripción actualizado a Regular.' AS mensaje;
-        ELSEIF parciales_no_aprobados >= 2 THEN
+            SET estado = 'regular'
+            WHERE id_alumno = p_id_alumno
+            AND id_materia = p_id_materia;
+        ELSEIF desaprobados >= 2 THEN
             UPDATE inscripcion_materia
-            SET estado = 'Libre'
-            WHERE id_inscripcion_materia = id_inscripcion_materia;
-            SELECT 'Estado de inscripción actualizado a Libre.' AS mensaje;
-        ELSE
-            SELECT 'Parcial registrado exitosamente, pero el estado no cambió.' AS mensaje;
+            SET estado = 'libre'
+            WHERE id_alumno = p_id_alumno
+            AND id_materia = p_id_materia;
         END IF;
     ELSE
-        SELECT 'No se puede registrar el parcial. El estado de inscripción en la materia no es Cursando.' AS mensaje;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se puede registrar el parcial. El estado de la inscripción no es "Cursando".';
     END IF;
-END$$
+END //
 
-DELIMITER ;
-------------------------------------------------------------------------------------------------------------
--- Para probar el procedimiento
-CALL registrar_parcial('Juan', 'Pérez', 'Programacion I', 'Parcial 1', '2024-09-16', 8.5);
+DELIMITER ;
+CALL agregar_nota_parcial(1, 2, 3, 8.50);
