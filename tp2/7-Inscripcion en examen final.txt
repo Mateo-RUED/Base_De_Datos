@@ -1,54 +1,60 @@
-DELIMITER $$
+DELIMITER //
 
-CREATE FUNCTION tiene_inscripcion_sin_calificacion(id_alumno INT, id_materia INT)
+CREATE FUNCTION tiene_inscripcion_sin_calificacion(p_id_alumno INT, p_id_materia INT)
 RETURNS BOOLEAN
 DETERMINISTIC
 BEGIN
-    DECLARE tiene_sin_calificacion BOOLEAN;
-    SELECT COUNT(*) > 0 INTO tiene_sin_calificacion
+    DECLARE v_count INT;
+
+    SELECT COUNT(*) INTO v_count
     FROM inscripcion_examen ie
-    JOIN inscripcion_materia im ON ie.id_alumno = im.id_alumno AND ie.id_mesa = im.id_comision
-    WHERE ie.id_alumno = id_alumno
-    AND im.id_materia = id_materia
+    INNER JOIN mesa m ON ie.id_mesa = m.id_mesa
+    WHERE ie.id_alumno = p_id_alumno
+    AND m.id_materia = p_id_materia
     AND ie.nota IS NULL;
-    RETURN tiene_sin_calificacion;
-END$$
+
+    RETURN v_count > 0;
+END //
 
 DELIMITER ;
-----------------------------------------------------------------------------------------------------------------
-DELIMITER $$
+
+DELIMITER //
+
+CREATE FUNCTION esta_regular(p_id_alumno INT, p_id_materia INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE v_estado VARCHAR(50);
+
+    SELECT im.estado INTO v_estado
+    FROM inscripcion_materia im
+    WHERE im.id_alumno = p_id_alumno
+    AND im.id_materia = p_id_materia;
+
+    RETURN v_estado = 'regular';
+END //
+
+DELIMITER ;
+
+DELIMITER //
 
 CREATE PROCEDURE inscribir_en_examen(
-    IN nombre_alumno VARCHAR(100),
-    IN apellido_alumno VARCHAR(100),
-    IN nombre_materia VARCHAR(100),
-    IN id_mesa INT,
-    IN fecha_inscripcion DATE
+    IN p_id_alumno INT,
+    IN p_id_materia INT,
+    IN p_id_mesa INT,
+    IN p_fecha_inscripcion DATE
 )
 BEGIN
-    DECLARE id_alumno INT;
-    DECLARE id_materia INT;
-    DECLARE id_inscripcion_materia INT;
-    DECLARE estado_inscripcion VARCHAR(20);
-    DECLARE tiene_sin_calificacion BOOLEAN;
-
-    SET id_alumno = (SELECT id_alumno FROM alumnos WHERE nombre = nombre_alumno AND apellido = apellido_alumno);
-    SET id_materia = (SELECT id_materia FROM materias WHERE nombre = nombre_materia);
-    SET id_inscripcion_materia = (SELECT id_inscripcion_materia FROM inscripcion_materia WHERE id_alumno = id_alumno AND id_materia = id_materia);
-    SET estado_inscripcion = (SELECT estado FROM inscripcion_materia WHERE id_inscripcion_materia = id_inscripcion_materia);
-
-    SET tiene_sin_calificacion = tiene_inscripcion_sin_calificacion(id_alumno, id_materia);
-
-    IF tiene_sin_calificacion THEN
-        SELECT 'No se puede inscribir en el examen. El alumno tiene inscripción previa sin calificación.' AS mensaje;
-    ELSEIF estado_inscripcion = 'Regular' THEN
-        INSERT INTO inscripcion_examen (id_alumno, id_mesa, fecha_inscripcion)
-        VALUES (id_alumno, id_mesa, fecha_inscripcion);
-        SELECT 'Inscripción en el examen realizada exitosamente.' AS mensaje;
+    IF tiene_inscripcion_sin_calificacion(p_id_alumno, p_id_materia) THEN
+        SELECT 'El alumno ya tiene una inscripción previa sin calificación en el examen.' AS mensaje;
+    ELSEIF NOT esta_regular(p_id_alumno, p_id_materia) THEN
+        SELECT 'El alumno no está en estado regular en la materia.' AS mensaje;
     ELSE
-        SELECT 'El alumno no está regular en la materia. No se puede inscribir en el examen.' AS mensaje;
+        INSERT INTO inscripcion_examen (id_alumno, id_mesa, fecha_inscripcion, nota, estado)
+        VALUES (p_id_alumno, p_id_mesa, p_fecha_inscripcion, NULL, NULL);
+        SELECT 'Inscripción exitosa en el examen.' AS mensaje;
     END IF;
-END$$
+END //
 
 DELIMITER ;
 ----------------------------------------------------------------------------------------------------------------
